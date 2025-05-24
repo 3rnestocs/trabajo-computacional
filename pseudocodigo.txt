@@ -1,0 +1,104 @@
+Figura 18.7: Interpolacion de Newton
+
+    SUBROUTINE NewtInt (x, y, n, xi, yint, ea)
+    LOCAL fdd₀,ₙ
+    DOFOR i = 0, n
+        fddᵢ,₀ = yᵢ
+    END DO
+    DOFOR j = 1, n
+        DOFOR i = 0, n - j
+        fddᵢ,ⱼ = (fddᵢ₊₁,ⱼ₋₁ - fddᵢ,ⱼ₋₁)/(xᵢ₊ⱼ - xᵢ)
+        END DO
+    END DO
+    xterm = 1
+    yint₀ = fdd₀,₀
+    DOFOR order = 1, n
+        xterm = xterm * (xi - x_order₋₁)
+        yint2 = yint_order₋₁ + fdd₀,ₒᵣdₑᵣ * xterm
+        Ea_order₋₁ = yint2 - yint_order₋₁
+        yint_order = yint2
+    END order
+    END NewtInt
+
+Figura 18.11 Interpolacion de Lagrange
+
+    FUNCTION Lagrng(x, y, n, x)
+    sum = 0
+    DOFOR i = 0, n
+        product = yᵢ
+        DOFOR j = 0, n
+        IF i ≠ j THEN
+            product = product * (x - xⱼ)/(xᵢ - xⱼ)
+        ENDIF
+        END DO
+        sum = sum + product
+    END DO
+    Lagrng = sum
+    END Lagrng
+
+Figura 21.9:
+
+    a) Regla del Trapecio (un segmento):
+
+        FUNCTION Trap(h, f0, f1)
+        Trap = h * (f0 + f1)/2
+        END Trap
+
+
+    b) Regla del Trapecio (múltiples segmentos):
+
+        FUNCTION Trapm(h, n, f)
+        sum = f₀
+        DOFOR i = 1, n - 1
+            sum = sum + 2 * fᵢ
+        END DO
+        sum = sum + fₙ
+        Trapm = h * sum / 2
+        END Trapm
+
+Figura 21.13: 
+
+    a) Regla de Simpson 1/3 (aplicación simple):
+
+        FUNCTION Simpl3(h, f0, f1, f2)
+            Simpl3 = 2 * h * (f0 + 4 * f1 + f2) / 6
+        END Simpl3
+
+
+    b) Regla de Simpson 3/8 (aplicación simple):
+
+        FUNCTION Simpl8(h, f0, f1, f2, f3)
+            Simpl8 = 3 * h * (f0 + 3 * (f1 + f2) + f3) / 8
+        END Simpl8
+
+    c) Regla de Simpson 1/3 (aplicación múltiple):
+
+        FUNCTION Simpl3m(h, n, f)
+            sum = f(0)
+            DOFOR i = 1 TO n - 2 STEP 2
+                sum = sum + 4 * f(i) + 2 * f(i + 1)
+            END DO
+            sum = sum + 4 * f(n - 1) + f(n)
+            Simpl3m = h * sum / 3
+        END Simpl3m
+
+    d) Regla de Simpson para segmentos pares e impares:
+
+        FUNCTION Simplnt(a, b, n, f)
+            h = (b - a) / n
+            IF n == 1 THEN
+                sum = Trap(h, f(n - 1), f(n))  // Asume que Trap está definida
+            ELSE
+                sum = 0  // Inicialización añadida
+                m = n
+                odd = n MOD 2  // Mejor práctica para verificar impar
+                IF odd != 0 AND n > 1 THEN
+                    sum = Simpl8(h, f(n - 3), f(n - 2), f(n - 1), f(n))
+                    m = n - 3
+                END IF
+                IF m > 1 THEN
+                    sum = sum + Simpl3m(h, m, f)
+                END IF
+            END IF
+            Simplnt = sum
+        END Simplnt
