@@ -2,270 +2,394 @@ function main_gui()
 % main_gui: Interfaz gráfica para métodos numéricos
 % Ejecuta este archivo para abrir la GUI del proyecto
 
-addpath('algoritmos');
+    addpath('algoritmos');
 
-  % Ventana principal con márgenes
-    f = figure( ...
-        'Name','Métodos Numéricos', ...
-        'NumberTitle','off', ...
-        'MenuBar','none', ...
-        'Resize','on', ...
-        'Units','normalized', ...
-        'Position',[0.05 0.05 0.9 0.9], ...    % 90% de ancho/alto
-        'WindowStyle','normal' ...
-    );
-movegui(f, 'center');
+    % --- Ventana principal ---
+    f = figure('Name','Métodos Numéricos', 'NumberTitle','off', 'MenuBar','none', ...
+        'Resize','on', 'Units','normalized', 'Position',[0.05 0.05 0.9 0.9], 'WindowStyle','normal');
+    movegui(f, 'center');
 
-% Panel izquierdo para controles
-panel_izq = uipanel('Parent',f, 'Title','Opciones y Datos', ...
-                        'FontSize',12, 'Units','normalized', ...
-                        'Position',[0.02 0.1 0.28 0.8]);
+    % --- Panel izquierdo para controles ---
+    panel_izq = uipanel('Parent',f, 'Title','Opciones y Datos', 'FontSize',12, ...
+        'Units','normalized', 'Position',[0.02 0.1 0.28 0.8]);
 
-metodos = {'Interpolación de Newton','Interpolación de Lagrange', ...
-           'Trapecio (simple)','Trapecio (múltiple)', ...
-           'Simpson 1/3 (simple)','Simpson 3/8 (simple)', ...
-           'Simpson 1/3 (múltiple)','Simpson mixto (par/impar)'};
+    metodos = {'Interpolación de Newton','Interpolación de Lagrange', ...
+            'Trapecio (simple)','Trapecio (múltiple)', ...
+            'Simpson 1/3 (simple)','Simpson 3/8 (simple)', ...
+            'Simpson 1/3 (múltiple)','Simpson mixto (par/impar)'};
 
-hMetodo = uicontrol('Parent',panel_izq,'Style','popupmenu','String',metodos,'Units','normalized', ...
-    'Position',[0.1 0.85 0.8 0.07],'FontSize',11);
+    % --- Selector de método ---
+    hMetodo = creaControl('popupmenu', panel_izq, [0.1 0.92 0.8 0.06], ...
+        {'String',metodos,'FontSize',11});
 
-hLabel1 = uicontrol('Parent',panel_izq,'Style','text','Units','normalized','Position',[0.1 0.75 0.8 0.05], ...
-    'String','x (vector):','HorizontalAlignment','left','FontSize',10);
-hEdit1 = uicontrol('Parent',panel_izq,'Style','edit','Units','normalized','Position',[0.1 0.7 0.8 0.06], ...
-    'String','[0 1 2 3]','FontSize',10);
+    % --- Menú de ejemplos precargados (justo debajo del selector de método) ---
+    hEjemplo = creaControl('popupmenu', panel_izq, [0.1 0.84 0.8 0.06], ...
+        {'String',{'Seleccionar ejemplo...'},'FontSize',10});
 
-hLabel2 = uicontrol('Parent',panel_izq,'Style','text','Units','normalized','Position',[0.1 0.62 0.8 0.05], ...
-    'String','y (vector):','HorizontalAlignment','left','FontSize',10);
-hEdit2 = uicontrol('Parent',panel_izq,'Style','edit','Units','normalized','Position',[0.1 0.57 0.8 0.06], ...
-    'String','[1 2.7183 7.3891 20.0855]','FontSize',10);
+    % --- Campos de entrada ---
+    hLabel1 = creaControl('text', panel_izq, [0.1 0.75 0.8 0.05], ...
+        {'String','x (vector):','HorizontalAlignment','left','FontSize',10});
+    hEdit1  = creaControl('edit', panel_izq, [0.1 0.7 0.8 0.06], ...
+        {'String','','FontSize',10});
+    hLabel2 = creaControl('text', panel_izq, [0.1 0.62 0.8 0.05], ...
+        {'String','y (vector):','HorizontalAlignment','left','FontSize',10});
+    hEdit2  = creaControl('edit', panel_izq, [0.1 0.57 0.8 0.06], ...
+        {'String','','FontSize',10});
+    hLabel3 = creaControl('text', panel_izq, [0.1 0.49 0.8 0.05], ...
+        {'String','xi / a / h / n:','HorizontalAlignment','left','FontSize',10});
+    hEdit3  = creaControl('edit', panel_izq, [0.1 0.44 0.8 0.06], ...
+        {'String','','FontSize',10});
+    hLabel4 = creaControl('text', panel_izq, [0.1 0.36 0.8 0.05], ...
+        {'String','b (si aplica):','HorizontalAlignment','left','FontSize',10});
+    hEdit4  = creaControl('edit', panel_izq, [0.1 0.31 0.8 0.06], ...
+        {'String','','FontSize',10});
 
-hLabel3 = uicontrol('Parent',panel_izq,'Style','text','Units','normalized','Position',[0.1 0.49 0.8 0.05], ...
-    'String','xi / a / h / n:','HorizontalAlignment','left','FontSize',10);
-hEdit3 = uicontrol('Parent',panel_izq,'Style','edit','Units','normalized','Position',[0.1 0.44 0.8 0.06], ...
-    'String','1','FontSize',10);
+    % --- Botón para ejecutar ---
+    hBoton = creaControl('pushbutton', panel_izq, [0.25 0.18 0.5 0.08], ...
+        {'String','Ejecutar','FontSize',12,'Callback',@ejecutar_callback});
 
-hLabel4 = uicontrol('Parent',panel_izq,'Style','text','Units','normalized','Position',[0.1 0.36 0.8 0.05], ...
-    'String','b (si aplica):','HorizontalAlignment','left','FontSize',10);
-hEdit4 = uicontrol('Parent',panel_izq,'Style','edit','Units','normalized','Position',[0.1 0.31 0.8 0.06], ...
-    'String','3','FontSize',10);
+    % --- Área de resultados ---
+    hResultado = uicontrol('Style','edit','Parent',panel_izq, 'Units','normalized', ...
+        'Position',[0.1 0.08 0.8 0.08], 'String','Resultado:', 'FontSize',11, ...
+        'HorizontalAlignment','left','Max',2,'Min',0,'Enable','inactive','BackgroundColor',[1 1 1]);
 
-hBoton = uicontrol('Parent',panel_izq,'Style','pushbutton','String','Ejecutar','FontSize',12, ...
-    'Units','normalized','Position',[0.25 0.18 0.5 0.08],'Callback',@ejecutar_callback);
+    % --- Panel derecho para gráfica ---
+    hAxes = axes('Parent',f,'Units','normalized','Position',[0.33 0.12 0.65 0.8]);
 
-hResultado = uicontrol('Parent',panel_izq,'Style','text','Units','normalized','Position',[0.1 0.08 0.8 0.08], ...
-    'String','Resultado:','FontSize',11,'HorizontalAlignment','left');
+    % --- Ejemplos precargados por método (cell-array de 8 filas) ---
+    ejemplos_por_metodo = {
+        { struct('nombre','e^x en [0 1 2 3]','x','[0 1 2 3]','y','[1 2.7183 7.3891 20.0855]','xi','1.5'), ...
+        struct('nombre','x^2 en [1 2 4]','x','[1 2 4]','y','[1 4 16]','xi','3') },
+        { struct('nombre','sin(x) en [0 pi/4 pi/2]','x','[0 pi/4 pi/2]','y','[0 0.7071 1]','xi','pi/6'), ...
+        struct('nombre','cos(x) en [0 pi/2 pi]','x','[0 pi/2 pi]','y','[1 0 -1]','xi','pi/3') },
+        { struct('nombre','e^x en [0,1]','y','[1 2.7183]','h','1'), ...
+        struct('nombre','x^2 en [0,2]','y','[0 4]','h','2') },
+        { struct('nombre','sin(x) en [0 pi/2 pi]','x','[0 pi/2 pi]','y','[0 1 0]','h','pi/2'), ...
+        struct('nombre','x^2 en [0 1 2 3]','x','[0 1 2 3]','y','[0 1 4 9]','h','1') },
+        { struct('nombre','1/(1+x^2) en [0 0.5 1]','y','[1 0.8 0.5]','h','0.5'), ...
+        struct('nombre','x^2 en [0 1 2]','y','[0 1 4]','h','1') },
+        { struct('nombre','x^3 en [0 1 2 3]','y','[0 1 8 27]','h','1'), ...
+        struct('nombre','sin(x) en [0 pi/6 pi/3 pi/2]','y','[0 0.5 0.8660 1]','h','pi/6') },
+        { struct('nombre','cos(x) en [0 pi/6 pi/3 pi/2 pi]','x','[0 pi/6 pi/3 pi/2 pi]','y','[1 0.8660 0.5 0 -1]','h','pi/6'), ...
+        struct('nombre','x^2 en [0 1 2 3 4]','x','[0 1 2 3 4]','y','[0 1 4 9 16]','h','1') },
+        { struct('nombre','ln(x+1) en [0 0.2 0.4 0.6 0.8 1]','x','[0 0.2 0.4 0.6 0.8 1]','y','[0 0.182 0.336 0.470 0.587 0.693]','a','0','b','1'), ...
+        struct('nombre','e^x en [0 0.25 0.5 0.75 1]','x','[0 0.25 0.5 0.75 1]','y','[1 1.2840 1.6487 2.1170 2.7183]','a','0','b','1') }
+    };
 
-% Panel derecho para gráfica
-hAxes = axes('Parent',f,'Units','normalized','Position',[0.33 0.12 0.65 0.8]);
+    % --- Callbacks y lógica de UI ---
+    set(hMetodo,'Callback',@metodo_changed);
+    set(hEjemplo,'Callback', @cargar_ejemplo);
+    actualizar_campos(); actualizar_ejemplos(); metodo_changed();
 
-% --- NUEVO: función para actualizar campos según el método seleccionado ---
-function actualizar_campos(~,~)
-    metodo = get(hMetodo,'Value');
-    % Por defecto, todos visibles
-    set([hLabel1 hEdit1 hLabel2 hEdit2 hLabel3 hEdit3 hLabel4 hEdit4], 'Visible', 'on');
-    switch metodo
-        case {1,2} % Interpolación
-            set(hLabel1,'String','x (vector):');
-            set(hLabel2,'String','y (vector):');
-            set(hLabel3,'String','xi:');
-            set(hLabel4,'Visible','off');
-            set(hEdit4,'Visible','off');
-        case 3 % Trapecio simple
-            set(hLabel1,'String','No usado','Visible','off');
-            set(hEdit1,'Visible','off');
-            set(hLabel2,'String','y = [f(a) f(b)]:');
-            set(hLabel3,'String','h = b-a:');
-            set(hLabel4,'Visible','off');
-            set(hEdit4,'Visible','off');
-        case 4 % Trapecio múltiple
-            set(hLabel1,'String','x (vector):','Visible','on');
-            set(hEdit1,'Visible','on');
-            set(hLabel2,'String','y (vector):');
-            set(hLabel3,'String','h:');
-            set(hLabel4,'Visible','off');
-            set(hEdit4,'Visible','off');
-        case 5 % Simpson 1/3 simple
-            set(hLabel1,'String','No usado','Visible','off');
-            set(hEdit1,'Visible','off');
-            set(hLabel2,'String','y = [f(a) f(m) f(b)]:');
-            set(hLabel3,'String','h = (b-a)/2:');
-            set(hLabel4,'Visible','off');
-            set(hEdit4,'Visible','off');
-        case 6 % Simpson 3/8 simple
-            set(hLabel1,'String','No usado','Visible','off');
-            set(hEdit1,'Visible','off');
-            set(hLabel2,'String','y = [f(a) f(a+h) f(a+2h) f(b)]:');
-            set(hLabel3,'String','h = (b-a)/3:');
-            set(hLabel4,'Visible','off');
-            set(hEdit4,'Visible','off');
-        case 7 % Simpson 1/3 múltiple
-            set(hLabel1,'String','x (vector):','Visible','on');
-            set(hEdit1,'Visible','on');
-            set(hLabel2,'String','y (vector):');
-            set(hLabel3,'String','h:');
-            set(hLabel4,'Visible','off');
-            set(hEdit4,'Visible','off');
-        case 8 % Simpson mixto
-            set(hLabel1,'String','x (vector):','Visible','on');
-            set(hEdit1,'Visible','on');
-            set(hLabel2,'String','y (vector):');
-            set(hLabel3,'String','a:');
-            set(hLabel4,'String','b:','Visible','on');
-            set(hEdit4,'Visible','on');
+    % --- Callback único para cambio de método ---
+    function metodo_changed(~,~)
+        cla(hAxes);                           % limpiar gráfica
+        set(hResultado,'String','Resultado:');% reiniciar texto
+        set(hEjemplo ,'Value',1);             % reset menú ejemplo
+        limpiar_campos();                     % vaciar edits
+        actualizar_campos();                  % mostrar/ocultar campos
+        actualizar_ejemplos();                % poblar menú ejemplo
     end
-end
-set(hMetodo,'Callback',@actualizar_campos);
-actualizar_campos();
 
-    function ejecutar_callback(~,~)
+    % --- Actualiza los campos visibles según el método seleccionado ---
+    function actualizar_campos(~,~)
         metodo = get(hMetodo,'Value');
-        % Validaciones y obtención de datos según método
+        set([hLabel1 hEdit1 hLabel2 hEdit2 hLabel3 hEdit3 hLabel4 hEdit4], 'Visible', 'on');
+        switch metodo
+            case {1,2}
+                set(hLabel1,'String','x (vector):');
+                set(hLabel2,'String','y (vector):');
+                set(hLabel3,'String','xi:');
+                set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+            case 3
+                set(hLabel1,'String','No usado','Visible','off'); set(hEdit1,'Visible','off');
+                set(hLabel2,'String','y = [f(a) f(b)]:');
+                set(hLabel3,'String','h = b-a:');
+                set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+            case 4
+                set(hLabel1,'String','x (vector):','Visible','on'); set(hEdit1,'Visible','on');
+                set(hLabel2,'String','y (vector):');
+                set(hLabel3,'String','h:');
+                set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+            case 5
+                set(hLabel1,'String','No usado','Visible','off'); set(hEdit1,'Visible','off');
+                set(hLabel2,'String','y = [f(a) f(m) f(b)]:');
+                set(hLabel3,'String','h = (b-a)/2:');
+                set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+            case 6
+                set(hLabel1,'String','No usado','Visible','off'); set(hEdit1,'Visible','off');
+                set(hLabel2,'String','y = [f(a) f(a+h) f(a+2h) f(b)]:');
+                set(hLabel3,'String','h = (b-a)/3:');
+                set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+            case 7
+                set(hLabel1,'String','x (vector):','Visible','on'); set(hEdit1,'Visible','on');
+                set(hLabel2,'String','y (vector):');
+                set(hLabel3,'String','h:');
+                set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+            case 8
+                set(hLabel1,'String','x (vector):','Visible','on'); set(hEdit1,'Visible','on');
+                set(hLabel2,'String','y (vector):');
+                set(hLabel3,'String','a:');
+                set(hLabel4,'String','b:','Visible','on'); set(hEdit4,'Visible','on');
+        end
+    end
+
+    % --- Actualiza el menú de ejemplos según el método seleccionado ---
+    function actualizar_ejemplos(~,~)
+        metodo = get(hMetodo,'Value');
+        set(hEjemplo,'Value',1); % Reset antes de poblar
+        lista = ejemplos_por_metodo{metodo};
+        nombres = [{'Seleccionar ejemplo...'} cellfun(@(e) e.nombre, lista, 'uni', false)];
+        set(hEjemplo,'String',nombres,'Value',1);
+    end
+
+    % --- Función para limpiar campos y resultados ---
+    function limpiar_campos()
+        set(hEdit1,'String','');
+        set(hEdit2,'String','');
+        set(hEdit3,'String','');
+        set(hEdit4,'String','');
+    end
+
+    % --- Función auxiliar para crear controles normalizados ---
+    function h = creaControl(style, parent, pos, props)
+        h = uicontrol('Style',style,'Parent',parent,'Units','normalized','Position',pos,props{:});
+    end
+
+    % --- Función auxiliar para leer datos de los campos de entrada ---
+    function datos = leeDatos(ed1, ed2, ed3, ed4)
+        str1 = get(ed1, 'String');
+        str2 = get(ed2, 'String');
+        str3 = get(ed3, 'String');
+        str4 = get(ed4, 'String');
+        if isempty(str1)
+            datos.x = [];
+        else
+            datos.x = eval(str1);
+        end
+        if isempty(str2)
+            datos.y = [];
+        else
+            datos.y = eval(str2);
+        end
+        if isempty(str3)
+            datos.v3 = NaN;
+        else
+            datos.v3 = eval(str3);
+        end
+        if isempty(str4)
+            datos.v4 = NaN;
+        else
+            datos.v4 = eval(str4);
+        end
+    end
+
+    % --- Carga los datos del ejemplo seleccionado en los campos de entrada ---
+    function cargar_ejemplo(~,~)
+        metodo = get(hMetodo,'Value');
+        lista = ejemplos_por_metodo{metodo};
+        idx   = get(hEjemplo, 'Value');
+        if idx < 2 || idx > numel(lista)+1
+            msgbox('Ejemplo fuera de rango','Error','error');
+            return;
+        end
+        ej = lista{idx-1};
+        campos = {
+          {'x','y','xi',''};      % 1: Newton
+          {'x','y','xi',''};      % 2: Lagrange
+          {'','y','h',''};        % 3: Trap. simple
+          {'x','y','h',''};       % 4: Trap. múltiple
+          {'','y','h',''};        % 5: Simpson 1/3 simple
+          {'','y','h',''};        % 6: Simpson 3/8 simple
+          {'x','y','h',''};       % 7: Simpson 1/3 múltiple
+          {'x','y','a','b'}       % 8: Simpson mixto
+        };
+        nombresCampos = campos{metodo};
+        editors = {hEdit1,hEdit2,hEdit3,hEdit4};
+        for k = 1:4
+            if ~isempty(nombresCampos{k}) && isfield(ej, nombresCampos{k})
+                set(editors{k}, 'String',  ej.(nombresCampos{k}));
+            else
+                set(editors{k}, 'String', '');
+            end
+        end
+    end
+
+    % --- Callback principal para ejecutar el método seleccionado ---
+    function ejecutar_callback(~,~)
         try
+            datos = leeDatos(hEdit1, hEdit2, hEdit3, hEdit4);
+            metodo = get(hMetodo,'Value');
+            % Validaciones estrictas de entrada adaptadas por método
+            switch metodo
+                case {1,2,4,7,8} % Métodos que requieren x
+                    if isempty(datos.x) || ~isvector(datos.x) || any(~isfinite(datos.x))
+                        error('Vector x inválido');
+                    end
+                otherwise % Métodos que NO requieren x (3,5,6)
+                    % No validar x
+            end
+            if isempty(datos.y) || ~isvector(datos.y) || any(~isfinite(datos.y))
+                error('Vector y inválido');
+            end
+            if isnan(datos.v3)
+                error('El campo 3 es inválido o vacío.');
+            end
+            if metodo == 8 && isnan(datos.v4)
+                error('El campo 4 es inválido o vacío.');
+            end
+            % Validaciones según método
             switch metodo
                 case {1,2} % Interpolación
-                    x = str2num(get(hEdit1,'String'));
-                    y = str2num(get(hEdit2,'String'));
-                    xi = str2double(get(hEdit3,'String'));
-                    if isempty(x) || isempty(y) || isnan(xi)
+                    if isempty(datos.x) || isempty(datos.y) || isnan(datos.v3)
                         error('Ingrese x, y y xi correctamente.');
                     end
-                    if length(x) ~= length(y)
+                    if length(datos.x) ~= length(datos.y)
                         error('x e y deben tener la misma longitud.');
                     end
+                    dibujarInterpolacion(hAxes, metodo, datos, hResultado);
                 case 3 % Trapecio simple
-                    y = str2num(get(hEdit2,'String'));
-                    h = str2double(get(hEdit3,'String'));
-                    if length(y) ~= 2 || isnan(h)
+                    if length(datos.y) ~= 2 || isnan(datos.v3)
                         error('y debe tener 2 valores y h debe ser numérico.');
                     end
+                    dibujarCuadratura(hAxes, metodo, datos, hResultado);
                 case 4 % Trapecio múltiple
-                    x = str2num(get(hEdit1,'String'));
-                    y = str2num(get(hEdit2,'String'));
-                    h = str2double(get(hEdit3,'String'));
-                    if isempty(x) || isempty(y) || isnan(h)
+                    if isempty(datos.x) || isempty(datos.y) || isnan(datos.v3)
                         error('Ingrese x, y y h correctamente.');
                     end
-                    if length(x) ~= length(y)
+                    if length(datos.x) ~= length(datos.y)
                         error('x e y deben tener la misma longitud.');
                     end
-                case 5 % Simpson 1/3 simple
-                    y = str2num(get(hEdit2,'String'));
-                    h = str2double(get(hEdit3,'String'));
-                    if length(y) ~= 3 || isnan(h)
+                    dibujarCuadratura(hAxes, metodo, datos, hResultado);
+                case 5
+                    if length(datos.y) ~= 3 || isnan(datos.v3)
                         error('y debe tener 3 valores y h debe ser numérico.');
                     end
-                case 6 % Simpson 3/8 simple
-                    y = str2num(get(hEdit2,'String'));
-                    h = str2double(get(hEdit3,'String'));
-                    if length(y) ~= 4 || isnan(h)
+                    dibujarCuadratura(hAxes, metodo, datos, hResultado);
+                case 6
+                    if length(datos.y) ~= 4 || isnan(datos.v3)
                         error('y debe tener 4 valores y h debe ser numérico.');
                     end
-                case 7 % Simpson 1/3 múltiple
-                    x = str2num(get(hEdit1,'String'));
-                    y = str2num(get(hEdit2,'String'));
-                    h = str2double(get(hEdit3,'String'));
-                    if isempty(x) || isempty(y) || isnan(h)
+                    dibujarCuadratura(hAxes, metodo, datos, hResultado);
+                case 7
+                    if isempty(datos.x) || isempty(datos.y) || isnan(datos.v3)
                         error('Ingrese x, y y h correctamente.');
                     end
-                    if length(x) ~= length(y)
+                    if length(datos.x) ~= length(datos.y)
                         error('x e y deben tener la misma longitud.');
                     end
-                    if mod(length(y)-1,2) ~= 0
+                    if mod(length(datos.y)-1,2) ~= 0
                         error('Para Simpson 1/3 múltiple, el número de segmentos debe ser par (n = length(y)-1).');
                     end
-                case 8 % Simpson mixto
-                    x = str2num(get(hEdit1,'String'));
-                    y = str2num(get(hEdit2,'String'));
-                    a = str2double(get(hEdit3,'String'));
-                    b = str2double(get(hEdit4,'String'));
-                    n = length(y)-1;
-                    if isempty(x) || isempty(y) || isnan(a) || isnan(b)
+                    dibujarCuadratura(hAxes, metodo, datos, hResultado);
+                case 8
+                    if isempty(datos.x) || isempty(datos.y) || isnan(datos.v3) || isnan(datos.v4)
                         error('Ingrese x, y, a y b correctamente.');
                     end
-                    if length(x) ~= length(y)
+                    if length(datos.x) ~= length(datos.y)
                         error('x e y deben tener la misma longitud.');
                     end
-                    if n < 1
+                    if length(datos.y) < 2
                         error('Debe haber al menos dos nodos.');
                     end
+                    dibujarCuadratura(hAxes, metodo, datos, hResultado);
             end
         catch ME
             set(hResultado,'String',['Error: ' ME.message]);
             cla(hAxes);
-            return;
+            msgbox(['Error: ' ME.message],'Error','error');
         end
+    end
 
+    % --- Utilidad para mostrar resultado con saltos de línea si es necesario ---
+    function setResultadoMultilinea(txt)
+        maxlen = 60;
+        if length(txt) > maxlen
+            % Rompe en espacios
+            palabras = strsplit(txt, ' ');
+            linea = '';
+            out = {};
+            for i=1:length(palabras)
+                if length(linea) + length(palabras{i}) + 1 > maxlen
+                    out{end+1} = strtrim(linea); %#ok<AGROW>
+                    linea = '';
+                end
+                linea = [linea ' ' palabras{i}];
+            end
+            out{end+1} = strtrim(linea);
+            txt = strjoin(out, sprintf('\n'));
+        end
+        set(hResultado,'String',txt);
+    end
+
+    % --- Dibuja la interpolación y muestra el resultado ---
+    function dibujarInterpolacion(hAxes, metodo, datos, hResultado)
         cla(hAxes);
-        resultado = '';
+        if metodo == 1 % Newton
+            [yint, ea] = newton_interp(datos.x, datos.y, datos.v3);
+            resultado = sprintf('Interpolación de Newton en x=%.4f: %.6f\nError estimado: %.2e', datos.v3, yint, ea);
+            xx = linspace(min(datos.x), max(datos.x), 100);
+            yy = arrayfun(@(z) newton_interp(datos.x, datos.y, z), xx);
+            plot(hAxes, datos.x, datos.y, 'ro', xx, yy, 'b-', datos.v3, yint, 'ks', 'MarkerFaceColor','k');
+            title(hAxes,'Interpolación de Newton');
+            xlabel(hAxes,'x'); ylabel(hAxes,'y');
+            legend(hAxes,'Datos','Polinomio','Interpolado','Location','northeast');
+            grid(hAxes,'on');
+        else % Lagrange
+            yint = lagrange_interp(datos.x, datos.y, datos.v3);
+            resultado = sprintf('Interpolación de Lagrange en x=%.4f: %.6f', datos.v3, yint);
+            xx = linspace(min(datos.x), max(datos.x), 100);
+            yy = arrayfun(@(z) lagrange_interp(datos.x, datos.y, z), xx);
+            plot(hAxes, datos.x, datos.y, 'ro', xx, yy, 'b-', datos.v3, yint, 'ks', 'MarkerFaceColor','k');
+            title(hAxes,'Interpolación de Lagrange');
+            xlabel(hAxes,'x'); ylabel(hAxes,'y');
+            legend(hAxes,'Datos','Polinomio','Interpolado','Location','northeast');
+            grid(hAxes,'on');
+        end
+        setResultadoMultilinea(['Resultado: ' resultado]);
+    end
+
+    % --- Dibuja la cuadratura y muestra el resultado ---
+    function dibujarCuadratura(hAxes, metodo, datos, hResultado)
+        cla(hAxes);
         switch metodo
-            case 1 % Newton
-                xi = val3;
-                [yint, ea] = newton_interp(x, y, xi);
-                resultado = sprintf('Interpolación de Newton en x=%.4f: %.6f\nError estimado: %.2e', xi, yint, ea);
-                xx = linspace(min(x), max(x), 100);
-                yy = arrayfun(@(z) newton_interp(x, y, z), xx);
-                plot(hAxes, x, y, 'ro', xx, yy, 'b-', xi, yint, 'ks', 'MarkerFaceColor','k');
-                title(hAxes,'Interpolación de Newton');
-                xlabel(hAxes,'x'); ylabel(hAxes,'y');
-                legend(hAxes,'Datos','Polinomio','Interpolado','Location','Best');
-                grid(hAxes,'on');
-            case 2 % Lagrange
-                xi = val3;
-                yint = lagrange_interp(x, y, xi);
-                resultado = sprintf('Interpolación de Lagrange en x=%.4f: %.6f', xi, yint);
-                xx = linspace(min(x), max(x), 100);
-                yy = arrayfun(@(z) lagrange_interp(x, y, z), xx);
-                plot(hAxes, x, y, 'ro', xx, yy, 'b-', xi, yint, 'ks', 'MarkerFaceColor','k');
-                title(hAxes,'Interpolación de Lagrange');
-                xlabel(hAxes,'x'); ylabel(hAxes,'y');
-                legend(hAxes,'Datos','Polinomio','Interpolado','Location','Best');
-                grid(hAxes,'on');
             case 3 % Trapecio simple
-                h = val3;
-                f0 = y(1); f1 = y(2);
+                h = datos.v3; f0 = datos.y(1); f1 = datos.y(2);
                 I = trapecio_simple(h, f0, f1);
                 resultado = sprintf('Trapecio simple: I = %.6f', I);
                 bar(hAxes, [1 2], [f0 f1]);
-                title(hAxes,'Trapecio simple');
-                xlabel(hAxes,'Índice'); ylabel(hAxes,'f(x)');
+                title(hAxes,'Trapecio simple'); xlabel(hAxes,'Índice'); ylabel(hAxes,'f(x)');
             case 4 % Trapecio múltiple
-                h = val3;
-                I = trapecio_multiple(h, y);
+                h = datos.v3;
+                I = trapecio_multiple(h, datos.y);
                 resultado = sprintf('Trapecio múltiple: I = %.6f', I);
-                plot(hAxes, x, y, 'bo-');
-                title(hAxes,'Trapecio múltiple');
-                xlabel(hAxes,'x'); ylabel(hAxes,'f(x)');
+                plot(hAxes, datos.x, datos.y, 'bo-');
+                title(hAxes,'Trapecio múltiple'); xlabel(hAxes,'x'); ylabel(hAxes,'f(x)');
             case 5 % Simpson 1/3 simple
-                h = val3;
-                f0 = y(1); f1 = y(2); f2 = y(3);
+                h = datos.v3; f0 = datos.y(1); f1 = datos.y(2); f2 = datos.y(3);
                 I = simpson_13_simple(h, f0, f1, f2);
                 resultado = sprintf('Simpson 1/3 simple: I = %.6f', I);
                 bar(hAxes, [1 2 3], [f0 f1 f2]);
-                title(hAxes,'Simpson 1/3 simple');
-                xlabel(hAxes,'Índice'); ylabel(hAxes,'f(x)');
+                title(hAxes,'Simpson 1/3 simple'); xlabel(hAxes,'Índice'); ylabel(hAxes,'f(x)');
             case 6 % Simpson 3/8 simple
-                h = val3;
-                f0 = y(1); f1 = y(2); f2 = y(3); f3 = y(4);
+                h = datos.v3; f0 = datos.y(1); f1 = datos.y(2); f2 = datos.y(3); f3 = datos.y(4);
                 I = simpson_38_simple(h, f0, f1, f2, f3);
                 resultado = sprintf('Simpson 3/8 simple: I = %.6f', I);
                 bar(hAxes, [1 2 3 4], [f0 f1 f2 f3]);
-                title(hAxes,'Simpson 3/8 simple');
-                xlabel(hAxes,'Índice'); ylabel(hAxes,'f(x)');
+                title(hAxes,'Simpson 3/8 simple'); xlabel(hAxes,'Índice'); ylabel(hAxes,'f(x)');
             case 7 % Simpson 1/3 múltiple
-                h = val3;
-                I = simpson_13_multiple(h, y);
+                h = datos.v3;
+                I = simpson_13_multiple(h, datos.y);
                 resultado = sprintf('Simpson 1/3 múltiple: I = %.6f', I);
-                plot(hAxes, x, y, 'bo-');
-                title(hAxes,'Simpson 1/3 múltiple');
-                xlabel(hAxes,'x'); ylabel(hAxes,'f(x)');
+                plot(hAxes, datos.x, datos.y, 'bo-');
+                title(hAxes,'Simpson 1/3 múltiple'); xlabel(hAxes,'x'); ylabel(hAxes,'f(x)');
             case 8 % Simpson mixto
-                a = val3; b = val4; n = length(y)-1;
-                I = simpson_mixto(a, b, n, y);
+                a = datos.v3; b = datos.v4; n = length(datos.y)-1;
+                I = simpson_mixto(a, b, n, datos.y);
                 resultado = sprintf('Simpson mixto: I = %.6f', I);
-                plot(hAxes, x, y, 'bo-');
-                title(hAxes,'Simpson mixto');
-                xlabel(hAxes,'x'); ylabel(hAxes,'f(x)');
+                plot(hAxes, datos.x, datos.y, 'bo-');
+                title(hAxes,'Simpson mixto'); xlabel(hAxes,'x'); ylabel(hAxes,'f(x)');
         end
-        set(hResultado,'String',['Resultado: ' resultado]);
+        setResultadoMultilinea(['Resultado: ' resultado]);
     end
 end
