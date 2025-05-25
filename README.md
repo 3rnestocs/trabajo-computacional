@@ -85,4 +85,3 @@ Este proyecto implementa algoritmos clásicos de **interpolación** y **cuadratu
 
 * Proyecto académico de libre uso y modificación con fines educativos.
 * ¡Explora, modifica y aprende! ✨
-`````
