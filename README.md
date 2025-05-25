@@ -85,8 +85,4 @@ Este proyecto implementa algoritmos clásicos de **interpolación** y **cuadratu
 
 * Proyecto académico de libre uso y modificación con fines educativos.
 * ¡Explora, modifica y aprende! ✨
-
-```
-
-Si en algún momento quieres añadir una imagen o GIF demostrativo (como una captura de la interfaz), avísame y te indico cómo integrarla también en el `README.md`.
 `````
