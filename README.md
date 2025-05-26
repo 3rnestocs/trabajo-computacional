@@ -71,6 +71,13 @@ Este proyecto implementa algoritmos clásicos de **interpolación** y **cuadratu
 * Se respetan condiciones particulares (como número par de nodos para Simpson 1/3 múltiple, etc.).
 * **Interpolación inversa (Problema 18.8):**
   * Ahora puedes resolver el problema 18.8 (encontrar x tal que f(x)=0.23 usando polinomio cúbico) seleccionando el método **Lagrange** y el ejemplo "Interpolación inversa (18.8): f(x)=0.23". Se invierten los papeles de x/y: ingresa los valores de f(x) como x y los valores de x como y, y coloca 0.23 como xi. El resultado será el valor de x correspondiente a f(x)=0.23.
+* **Cuadratura (Problema 21.1):**
+  * Se han integrado ejemplos para resolver el problema 21.1 \((1 - e^{-2x})\) en el intervalo \([0,4]\) usando los métodos de cuadratura:
+    * Trapecio simple y múltiple.
+    * Simpson 1/3 simple y múltiple.
+    * Simpson 3/8 simple.
+    * Simpson mixto.
+  * El valor analítico verdadero es **1.9826**, útil para calcular errores relativos.
 
 </details>
 

@@ -77,18 +77,12 @@ function main_gui()
         struct('nombre','Ejercicio 18.1: log10 en log(8) log(9) log(11) y log(12) ','x','[8,9,11,12]','y','[0.9030900,0.9542425,1.0413927,1.0791812]','xi','10', 'valor_verdadero', '1'), ...
         struct('nombre','Ejercicio 18.8: Interpolación inversa (18.8): f(x)=0.23', 'x','[0.3333, 0.25, 0.2, 0.1667]', 'y','[3, 4, 5, 6]', 'xi','0.23', 'valor_verdadero','')
         },
-        { struct('nombre','e^x en [0,1]','y','[1 2.7183]','h','1'), ...
-        struct('nombre','x^2 en [0,2]','y','[0 4]','h','2') },
-        { struct('nombre','sin(x) en [0 pi/2 pi]','x','[0 pi/2 pi]','y','[0 1 0]','h','pi/2'), ...
-        struct('nombre','x^2 en [0 1 2 3]','x','[0 1 2 3]','y','[0 1 4 9]','h','1') },
-        { struct('nombre','1/(1+x^2) en [0 0.5 1]','y','[1 0.8 0.5]','h','0.5'), ...
-        struct('nombre','x^2 en [0 1 2]','y','[0 1 4]','h','1') },
-        { struct('nombre','x^3 en [0 1 2 3]','y','[0 1 8 27]','h','1'), ...
-        struct('nombre','sin(x) en [0 pi/6 pi/3 pi/2]','y','[0 0.5 0.8660 1]','h','pi/6') },
-        { struct('nombre','cos(x) en [0 pi/6 pi/3 pi/2 pi]','x','[0 pi/6 pi/3 pi/2 pi]','y','[1 0.8660 0.5 0 -1]','h','pi/6'), ...
-        struct('nombre','x^2 en [0 1 2 3 4]','x','[0 1 2 3 4]','y','[0 1 4 9 16]','h','1') },
-        { struct('nombre','ln(x+1) en [0 0.2 0.4 0.6 0.8 1]','x','[0 0.2 0.4 0.6 0.8 1]','y','[0 0.182 0.336 0.470 0.587 0.693]','a','0','b','1'), ...
-        struct('nombre','e^x en [0 0.25 0.5 0.75 1]','x','[0 0.25 0.5 0.75 1]','y','[1 1.2840 1.6487 2.1170 2.7183]','a','0','b','1') }
+        { struct('nombre','Ejercicio 21.1: Trapecio simple para (1-exp(-2x)) en [0,4]', 'y','[1-exp(-2*0), 1-exp(-2*4)]', 'h','4', 'valor_verdadero','1.9826') },
+        { struct('nombre','Ejercicio 21.1: Trapecio múltiple n=2 para (1-exp(-2x)) en [0,2,4]', 'x','[0 2 4]', 'y','[1-exp(-2*0), 1-exp(-2*2), 1-exp(-2*4)]', 'h','2', 'valor_verdadero','1.9826') },
+        { struct('nombre','Ejercicio 21.1: Simpson 1/3 simple para (1-exp(-2x)) en [0,2,4]', 'y','[1-exp(-2*0), 1-exp(-2*2), 1-exp(-2*4)]', 'h','2', 'valor_verdadero','1.9826') },
+        { struct('nombre','Ejercicio 21.1: Simpson 3/8 simple para (1-exp(-2x)) en [0,1.3333,2.6667,4]', 'y','[1-exp(-2*0), 1-exp(-2*1.3333), 1-exp(-2*2.6667), 1-exp(-2*4)]', 'h','1.3333', 'valor_verdadero','1.9826') },
+        { struct('nombre','Ejercicio 21.1: Simpson 1/3 múltiple n=4 para (1-exp(-2x)) en [0,1,2,3,4]', 'x','[0 1 2 3 4]', 'y','[1-exp(-2*0), 1-exp(-2*1), 1-exp(-2*2), 1-exp(-2*3), 1-exp(-2*4)]', 'h','1', 'valor_verdadero','1.9826') },
+        { struct('nombre','Ejercicio 21.1: Simpson mixto n=5 para (1-exp(-2x)) en [0,0.8,1.6,2.4,3.2,4]', 'x','[0 0.8 1.6 2.4 3.2 4]', 'y','[1-exp(-2*0), 1-exp(-2*0.8), 1-exp(-2*1.6), 1-exp(-2*2.4), 1-exp(-2*3.2), 1-exp(-2*4)]', 'a','0', 'b','4', 'valor_verdadero','1.9826') }
     };
 
     % --- Callbacks y lógica de UI ---
