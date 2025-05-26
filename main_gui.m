@@ -64,14 +64,18 @@ function main_gui()
     % --- Ejemplos precargados por método (cell-array de 8 filas) ---
     ejemplos_por_metodo = {
         {
-        struct('nombre','log10 en log(8) y log(12)','x','[8,12]','y','[0.9030900,1.0791812]','xi','10', 'valor_verdadero', '1'), ...
-        struct('nombre','log10 en log(9) y log(11)','x','[9,11]','y','[0.9542425,1.0413927]','xi','10', 'valor_verdadero', '1'), ...
-        struct('nombre','log10 en log(8) log(9) y log(11)','x','[8,9,11]','y','[0.9030900,0.9542425,1.0413927]','xi','10', 'valor_verdadero', '1'), ...
-        struct('nombre','log10 en log(8) log(9) log(11) y log(12) ','x','[8,9,11,12]','y','[0.9030900,0.9542425,1.0413927,1.0791812]','xi','10', 'valor_verdadero', '1')
+        struct('nombre','Ejercicio 18.1: log10 en log(8) y log(12)','x','[8,12]','y','[0.9030900,1.0791812]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','Ejercicio 18.2: log10 en log(9) y log(11)','x','[9,11]','y','[0.9542425,1.0413927]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','Ejercicio 18.2: log10 en log(8) log(9) y log(11)','x','[8,9,11]','y','[0.9030900,0.9542425,1.0413927]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','Ejercicio 18.1: log10 en log(8) log(9) log(11) y log(12) ','x','[8,9,11,12]','y','[0.9030900,0.9542425,1.0413927,1.0791812]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','Ejercicio 18.8: Interpolación inversa (18.8): f(x)=0.23', 'x','[0.3333, 0.25, 0.2, 0.1667]', 'y','[3, 4, 5, 6]', 'xi','0.23', 'valor_verdadero','')
         },
         {
-        struct('nombre','log10 en log(8) y log(12)','x','[8,12]','y','[0.9030900,1.0791812]','xi','10'), ...
-        struct('nombre','log10 en log(9) y log(11)','x','[9,11]','y','[0.9542425,1.0413927]','xi','10'),
+        struct('nombre','Ejercicio 18.1: log10 en log(8) y log(12)','x','[8,12]','y','[0.9030900,1.0791812]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','Ejercicio 18.2: log10 en log(9) y log(11)','x','[9,11]','y','[0.9542425,1.0413927]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','Ejercicio 18.2: log10 en log(8) log(9) y log(11)','x','[8,9,11]','y','[0.9030900,0.9542425,1.0413927]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','Ejercicio 18.1: log10 en log(8) log(9) log(11) y log(12) ','x','[8,9,11,12]','y','[0.9030900,0.9542425,1.0413927,1.0791812]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','Ejercicio 18.8: Interpolación inversa (18.8): f(x)=0.23', 'x','[0.3333, 0.25, 0.2, 0.1667]', 'y','[3, 4, 5, 6]', 'xi','0.23', 'valor_verdadero','')
         },
         { struct('nombre','e^x en [0,1]','y','[1 2.7183]','h','1'), ...
         struct('nombre','x^2 en [0,2]','y','[0 4]','h','2') },
@@ -118,7 +122,7 @@ function main_gui()
                 set(hLabel2,'String','y (vector):');
                 set(hLabel3,'String','xi:');
                 set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
-                set(hLabel5,'Visible','off'); set(hEdit5,'Visible','off');
+                set(hLabel5,'Visible','on'); set(hEdit5,'Visible','on'); % Mostrar campo valor verdadero TAMBIÉN para Lagrange
             case 3
                 set(hLabel1,'String','No usado','Visible','off'); set(hEdit1,'Visible','off');
                 set(hLabel2,'String','y = [f(a) f(b)]:');
@@ -227,7 +231,7 @@ function main_gui()
         ej = lista{idx-1};
         campos = {
           {'x','y','xi','','valor_verdadero'}; % 1: Newton
-          {'x','y','xi',''};      % 2: Lagrange
+          {'x','y','xi','','valor_verdadero'}; % 2: Lagrange (ahora incluye valor_verdadero)
           {'','y','h',''};        % 3: Trap. simple
           {'x','y','h',''};       % 4: Trap. múltiple
           {'','y','h',''};        % 5: Simpson 1/3 simple
@@ -360,6 +364,9 @@ function main_gui()
             if ~isempty(datos.v5)
                 [yint, er] = newton_interp(datos.x, datos.y, datos.v3, datos.v5);
                 resultado = sprintf('Interpolación de Newton en x=%.4f: %.6f\nError relativo: %.6f%%', datos.v3, yint, er);
+            else
+                yint = newton_interp(datos.x, datos.y, datos.v3);
+                resultado = sprintf('Interpolación de Newton en x=%.4f: %.6f', datos.v3, yint);
             end
             xx = linspace(min(datos.x), max(datos.x), 100);
             yy = arrayfun(@(z) newton_interp(datos.x, datos.y, z), xx);
@@ -370,7 +377,12 @@ function main_gui()
             grid(hAxes,'on');
         else % Lagrange
             yint = lagrange_interp(datos.x, datos.y, datos.v3);
-            resultado = sprintf('Interpolación de Lagrange en x=%.4f: %.6f', datos.v3, yint);
+            if ~isempty(datos.v5)
+                er = abs((datos.v5 - yint)/datos.v5)*100;
+                resultado = sprintf('Interpolación de Lagrange en x=%.4f: %.6f\nError relativo: %.6f%%', datos.v3, yint, er);
+            else
+                resultado = sprintf('Interpolación de Lagrange en x=%.4f: %.6f', datos.v3, yint);
+            end
             xx = linspace(min(datos.x), max(datos.x), 100);
             yy = arrayfun(@(z) lagrange_interp(datos.x, datos.y, z), xx);
             plot(hAxes, datos.x, datos.y, 'ro', xx, yy, 'b-', datos.v3, yint, 'ks', 'MarkerFaceColor','k');

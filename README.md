@@ -69,6 +69,8 @@ Este proyecto implementa algoritmos clásicos de **interpolación** y **cuadratu
 
 * Cada algoritmo tiene **al menos dos ejemplos listos** para su ejecución.
 * Se respetan condiciones particulares (como número par de nodos para Simpson 1/3 múltiple, etc.).
+* **Interpolación inversa (Problema 18.8):**
+  * Ahora puedes resolver el problema 18.8 (encontrar x tal que f(x)=0.23 usando polinomio cúbico) seleccionando el método **Lagrange** y el ejemplo "Interpolación inversa (18.8): f(x)=0.23". Se invierten los papeles de x/y: ingresa los valores de f(x) como x y los valores de x como y, y coloca 0.23 como xi. El resultado será el valor de x correspondiente a f(x)=0.23.
 
 </details>
 
@@ -84,3 +86,4 @@ Este proyecto implementa algoritmos clásicos de **interpolación** y **cuadratu
 ## 👨‍💻 Autores y Licencia
 
 * Proyecto académico de libre uso y modificación con fines educativos.
+````
