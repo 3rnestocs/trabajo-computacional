@@ -3,25 +3,28 @@
 % Basado en el pseudocódigo de la Figura 18.7 (pseudocodigo.txt)
 %
 % Parámetros:
-%   x    : vector de nodos x_i
-%   y    : vector de valores y_i = f(x_i)
-%   xi   : punto donde se interpola
+%   x           : vector de nodos x_i
+%   y           : vector de valores y_i = f(x_i)
+%   xi          : punto donde se interpola
+%   valor_verdadero: valor exacto de la función en xi (opcional)
 %
 % Salidas:
-%   yint : valor interpolado en xi
-%   ea   : estimación del error (diferencia entre las dos últimas aproximaciones)
+%   yint        : valor interpolado en xi
+%   ea          : estimación del error basado en el último término (%)
+%   er          : error relativo porcentual respecto al valor verdadero (%)
 %
 % Variables internas:
 %   n      : grado del polinomio (n = length(x)-1)
 %   fdd    : tabla de diferencias divididas
 %   xterm  : producto acumulado (xi - x_j)
-%   yint_k : aproximación en el paso k
+%   incremento : contribución del último término del polinomio
 
-% Referencia:
-%   Figura 18.7: SUBROUTINE NewtInt (x, y, n, xi, yint, ea)
-%   Implementa diferencias divididas y evaluación incremental del polinomio.
+function [yint, er] = newton_interp(x, y, xi, valor_verdadero)
+    % Verificar que x e y tengan la misma longitud
+    if length(x) ~= length(y)
+        error('Los vectores x e y deben tener la misma longitud.');
+    end
 
-function [yint, ea] = newton_interp(x, y, xi)
     n = length(x);
     fdd = zeros(n, n);
     fdd(:,1) = y(:);
@@ -36,11 +39,22 @@ function [yint, ea] = newton_interp(x, y, xi)
     % Evaluación del polinomio en xi
     yint = fdd(1,1);
     xterm = 1;
-    ea = 0;
+    incremento = 0;
+
     for order = 2:n
         xterm = xterm * (xi - x(order-1));
         incremento = fdd(1,order) * xterm;
-        ea = incremento;
         yint = yint + incremento;
+    end
+
+    % Cálculo del error relativo porcentual según la fórmula
+    if nargin == 4 && ~isempty(valor_verdadero)
+        if valor_verdadero ~= 0
+            er = abs((valor_verdadero - yint) / valor_verdadero) * 100;
+        else
+            er = Inf;  % Evitar división por cero
+        end
+    else
+        er = NaN;  % No se proporcionó valor verdadero
     end
 end

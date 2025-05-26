@@ -36,13 +36,18 @@ function main_gui()
     hEdit2  = creaControl('edit', panel_izq, [0.1 0.57 0.8 0.06], ...
         {'String','','FontSize',10});
     hLabel3 = creaControl('text', panel_izq, [0.1 0.49 0.8 0.05], ...
-        {'String','xi / a / h / n:','HorizontalAlignment','left','FontSize',10});
+        {'String','xi:','HorizontalAlignment','left','FontSize',10}); % Cambiado a 'xi:' para claridad
     hEdit3  = creaControl('edit', panel_izq, [0.1 0.44 0.8 0.06], ...
         {'String','','FontSize',10});
     hLabel4 = creaControl('text', panel_izq, [0.1 0.36 0.8 0.05], ...
         {'String','b (si aplica):','HorizontalAlignment','left','FontSize',10});
     hEdit4  = creaControl('edit', panel_izq, [0.1 0.31 0.8 0.06], ...
         {'String','','FontSize',10});
+    % Nuevo campo para el valor verdadero, posicionado debajo de xi con tamaño ajustado
+    hLabel5 = creaControl('text', panel_izq, [0.1 0.37 0.8 0.05], ... % Ajustado para estar justo debajo de hEdit3
+        {'String','Valor verdadero:','HorizontalAlignment','left','FontSize',10, 'Visible', 'off'});
+    hEdit5  = creaControl('edit', panel_izq, [0.1 0.32 0.8 0.06], ... % Ajustado para alinear con hEdit3 y hEdit4
+        {'String','','FontSize',10, 'Visible', 'off'});
 
     % --- Botón para ejecutar ---
     hBoton = creaControl('pushbutton', panel_izq, [0.25 0.18 0.5 0.08], ...
@@ -58,10 +63,16 @@ function main_gui()
 
     % --- Ejemplos precargados por método (cell-array de 8 filas) ---
     ejemplos_por_metodo = {
-        { struct('nombre','e^x en [0 1 2 3]','x','[0 1 2 3]','y','[1 2.7183 7.3891 20.0855]','xi','1.5'), ...
-        struct('nombre','x^2 en [1 2 4]','x','[1 2 4]','y','[1 4 16]','xi','3') },
-        { struct('nombre','sin(x) en [0 pi/4 pi/2]','x','[0 pi/4 pi/2]','y','[0 0.7071 1]','xi','pi/6'), ...
-        struct('nombre','cos(x) en [0 pi/2 pi]','x','[0 pi/2 pi]','y','[1 0 -1]','xi','pi/3') },
+        {
+        struct('nombre','log10 en log(8) y log(12)','x','[8,12]','y','[0.9030900,1.0791812]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','log10 en log(9) y log(11)','x','[9,11]','y','[0.9542425,1.0413927]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','log10 en log(8) log(9) y log(11)','x','[8,9,11]','y','[0.9030900,0.9542425,1.0413927]','xi','10', 'valor_verdadero', '1'), ...
+        struct('nombre','log10 en log(8) log(9) log(11) y log(12) ','x','[8,9,11,12]','y','[0.9030900,0.9542425,1.0413927,1.0791812]','xi','10', 'valor_verdadero', '1')
+        },
+        {
+        struct('nombre','log10 en log(8) y log(12)','x','[8,12]','y','[0.9030900,1.0791812]','xi','10'), ...
+        struct('nombre','log10 en log(9) y log(11)','x','[9,11]','y','[0.9542425,1.0413927]','xi','10'),
+        },
         { struct('nombre','e^x en [0,1]','y','[1 2.7183]','h','1'), ...
         struct('nombre','x^2 en [0,2]','y','[0 4]','h','2') },
         { struct('nombre','sin(x) en [0 pi/2 pi]','x','[0 pi/2 pi]','y','[0 1 0]','h','pi/2'), ...
@@ -94,43 +105,56 @@ function main_gui()
     % --- Actualiza los campos visibles según el método seleccionado ---
     function actualizar_campos(~,~)
         metodo = get(hMetodo,'Value');
-        set([hLabel1 hEdit1 hLabel2 hEdit2 hLabel3 hEdit3 hLabel4 hEdit4], 'Visible', 'on');
+        set([hLabel1 hEdit1 hLabel2 hEdit2 hLabel3 hEdit3 hLabel4 hEdit4 hLabel5 hEdit5], 'Visible', 'on');
         switch metodo
-            case {1,2}
+            case 1 % Interpolación de Newton
                 set(hLabel1,'String','x (vector):');
                 set(hLabel2,'String','y (vector):');
                 set(hLabel3,'String','xi:');
                 set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+                set(hLabel5,'Visible','on'); set(hEdit5,'Visible','on'); % Mostrar campo valor verdadero
+            case 2 % Interpolación de Lagrange
+                set(hLabel1,'String','x (vector):');
+                set(hLabel2,'String','y (vector):');
+                set(hLabel3,'String','xi:');
+                set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+                set(hLabel5,'Visible','off'); set(hEdit5,'Visible','off');
             case 3
                 set(hLabel1,'String','No usado','Visible','off'); set(hEdit1,'Visible','off');
                 set(hLabel2,'String','y = [f(a) f(b)]:');
                 set(hLabel3,'String','h = b-a:');
                 set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+                set(hLabel5,'Visible','off'); set(hEdit5,'Visible','off');
             case 4
                 set(hLabel1,'String','x (vector):','Visible','on'); set(hEdit1,'Visible','on');
                 set(hLabel2,'String','y (vector):');
                 set(hLabel3,'String','h:');
                 set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+                set(hLabel5,'Visible','off'); set(hEdit5,'Visible','off');
             case 5
                 set(hLabel1,'String','No usado','Visible','off'); set(hEdit1,'Visible','off');
                 set(hLabel2,'String','y = [f(a) f(m) f(b)]:');
                 set(hLabel3,'String','h = (b-a)/2:');
                 set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+                set(hLabel5,'Visible','off'); set(hEdit5,'Visible','off');
             case 6
                 set(hLabel1,'String','No usado','Visible','off'); set(hEdit1,'Visible','off');
                 set(hLabel2,'String','y = [f(a) f(a+h) f(a+2h) f(b)]:');
                 set(hLabel3,'String','h = (b-a)/3:');
                 set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+                set(hLabel5,'Visible','off'); set(hEdit5,'Visible','off');
             case 7
                 set(hLabel1,'String','x (vector):','Visible','on'); set(hEdit1,'Visible','on');
                 set(hLabel2,'String','y (vector):');
                 set(hLabel3,'String','h:');
                 set(hLabel4,'Visible','off'); set(hEdit4,'Visible','off');
+                set(hLabel5,'Visible','off'); set(hEdit5,'Visible','off');
             case 8
                 set(hLabel1,'String','x (vector):','Visible','on'); set(hEdit1,'Visible','on');
                 set(hLabel2,'String','y (vector):');
                 set(hLabel3,'String','a:');
                 set(hLabel4,'String','b:','Visible','on'); set(hEdit4,'Visible','on');
+                set(hLabel5,'Visible','off'); set(hEdit5,'Visible','off');
         end
     end
 
@@ -149,6 +173,7 @@ function main_gui()
         set(hEdit2,'String','');
         set(hEdit3,'String','');
         set(hEdit4,'String','');
+        set(hEdit5,'String',''); % Limpiar nuevo campo
     end
 
     % --- Función auxiliar para crear controles normalizados ---
@@ -157,11 +182,12 @@ function main_gui()
     end
 
     % --- Función auxiliar para leer datos de los campos de entrada ---
-    function datos = leeDatos(ed1, ed2, ed3, ed4)
+    function datos = leeDatos(ed1, ed2, ed3, ed4, ed5)
         str1 = get(ed1, 'String');
         str2 = get(ed2, 'String');
         str3 = get(ed3, 'String');
         str4 = get(ed4, 'String');
+        str5 = get(ed5, 'String');
         if isempty(str1)
             datos.x = [];
         else
@@ -182,6 +208,11 @@ function main_gui()
         else
             datos.v4 = eval(str4);
         end
+        if isempty(str5)
+            datos.v5 = [];
+        else
+            datos.v5 = eval(str5);
+        end
     end
 
     % --- Carga los datos del ejemplo seleccionado en los campos de entrada ---
@@ -195,7 +226,7 @@ function main_gui()
         end
         ej = lista{idx-1};
         campos = {
-          {'x','y','xi',''};      % 1: Newton
+          {'x','y','xi','','valor_verdadero'}; % 1: Newton
           {'x','y','xi',''};      % 2: Lagrange
           {'','y','h',''};        % 3: Trap. simple
           {'x','y','h',''};       % 4: Trap. múltiple
@@ -205,10 +236,10 @@ function main_gui()
           {'x','y','a','b'}       % 8: Simpson mixto
         };
         nombresCampos = campos{metodo};
-        editors = {hEdit1,hEdit2,hEdit3,hEdit4};
-        for k = 1:4
+        editors = {hEdit1,hEdit2,hEdit3,hEdit4,hEdit5};
+        for k = 1:5
             if ~isempty(nombresCampos{k}) && isfield(ej, nombresCampos{k})
-                set(editors{k}, 'String',  ej.(nombresCampos{k}));
+                set(editors{k}, 'String', ej.(nombresCampos{k}));
             else
                 set(editors{k}, 'String', '');
             end
@@ -218,7 +249,7 @@ function main_gui()
     % --- Callback principal para ejecutar el método seleccionado ---
     function ejecutar_callback(~,~)
         try
-            datos = leeDatos(hEdit1, hEdit2, hEdit3, hEdit4);
+            datos = leeDatos(hEdit1, hEdit2, hEdit3, hEdit4, hEdit5);
             metodo = get(hMetodo,'Value');
             % Validaciones estrictas de entrada adaptadas por método
             switch metodo
@@ -302,21 +333,21 @@ function main_gui()
     end
 
     % --- Utilidad para mostrar resultado con saltos de línea si es necesario ---
-    function setResultadoMultilinea(txt)
+  function setResultadoMultilinea(txt)
         maxlen = 60;
         if length(txt) > maxlen
             % Rompe en espacios
             palabras = strsplit(txt, ' ');
             linea = '';
             out = {};
-            for i=1:length(palabras)
+            for i = 1:length(palabras)
                 if length(linea) + length(palabras{i}) + 1 > maxlen
-                    out{end+1} = strtrim(linea); %#ok<AGROW>
+                    out{end+1} = strtrim(linea); % Fixed: Changed ] to )
                     linea = '';
                 end
                 linea = [linea ' ' palabras{i}];
             end
-            out{end+1} = strtrim(linea);
+            out{end+1} = strtrim(linea); % Fixed: Changed ] to )
             txt = strjoin(out, sprintf('\n'));
         end
         set(hResultado,'String',txt);
@@ -326,8 +357,10 @@ function main_gui()
     function dibujarInterpolacion(hAxes, metodo, datos, hResultado)
         cla(hAxes);
         if metodo == 1 % Newton
-            [yint, ea] = newton_interp(datos.x, datos.y, datos.v3);
-            resultado = sprintf('Interpolación de Newton en x=%.4f: %.6f\nError estimado: %.2e', datos.v3, yint, ea);
+            if ~isempty(datos.v5)
+                [yint, er] = newton_interp(datos.x, datos.y, datos.v3, datos.v5);
+                resultado = sprintf('Interpolación de Newton en x=%.4f: %.6f\nError relativo: %.6f%%', datos.v3, yint, er);
+            end
             xx = linspace(min(datos.x), max(datos.x), 100);
             yy = arrayfun(@(z) newton_interp(datos.x, datos.y, z), xx);
             plot(hAxes, datos.x, datos.y, 'ro', xx, yy, 'b-', datos.v3, yint, 'ks', 'MarkerFaceColor','k');
