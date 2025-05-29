@@ -354,6 +354,23 @@ function main_gui()
     % --- Dibuja la interpolación y muestra el resultado ---
     function dibujarInterpolacion(hAxes, metodo, datos, hResultado)
         cla(hAxes);
+        % Detectar si es un ejemplo de logaritmo para graficar log10(x)
+        esLog = false;
+        try
+            % Solo si ambos vectores son numéricos y positivos
+            if isnumeric(datos.x) && isnumeric(datos.y) && all(datos.x > 0) && all(datos.y > 0)
+                if length(datos.x) == length(datos.y)
+                    % Checar si y ~ log10(x) o x ~ log10(y) (para inversa)
+                    if all(abs(datos.y - log10(datos.x)) < 1e-6)
+                        esLog = true;
+                    elseif all(abs(datos.x - log10(datos.y)) < 1e-6)
+                        esLog = true;
+                    end
+                end
+            end
+        catch
+            esLog = false;
+        end
         if metodo == 1 % Newton
             if ~isempty(datos.v5)
                 [yint, er] = newton_interp(datos.x, datos.y, datos.v3, datos.v5);
@@ -362,12 +379,22 @@ function main_gui()
                 yint = newton_interp(datos.x, datos.y, datos.v3);
                 resultado = sprintf('Interpolación de Newton en x=%.4f: %.6f', datos.v3, yint);
             end
-            xx = linspace(min(datos.x), max(datos.x), 100);
+            xx = linspace(min(datos.x), max(datos.x), 200);
             yy = arrayfun(@(z) newton_interp(datos.x, datos.y, z), xx);
             plot(hAxes, datos.x, datos.y, 'ro', xx, yy, 'b-', datos.v3, yint, 'ks', 'MarkerFaceColor','k');
+            hold(hAxes,'on');
+            if esLog
+                yyf = log10(xx);
+                plot(hAxes, xx, yyf, 'g--', 'LineWidth',1.5);
+            end
+            hold(hAxes,'off');
             title(hAxes,'Interpolación de Newton');
             xlabel(hAxes,'x'); ylabel(hAxes,'y');
-            legend(hAxes,'Datos','Polinomio','Interpolado','Location','northeast');
+            if esLog
+                legend(hAxes,'Datos','Polinomio','Interpolado','log_{10}(x)','Location','northeast');
+            else
+                legend(hAxes,'Datos','Polinomio','Interpolado','Location','northeast');
+            end
             grid(hAxes,'on');
         else % Lagrange
             yint = lagrange_interp(datos.x, datos.y, datos.v3);
@@ -377,12 +404,22 @@ function main_gui()
             else
                 resultado = sprintf('Interpolación de Lagrange en x=%.4f: %.6f', datos.v3, yint);
             end
-            xx = linspace(min(datos.x), max(datos.x), 100);
+            xx = linspace(min(datos.x), max(datos.x), 200);
             yy = arrayfun(@(z) lagrange_interp(datos.x, datos.y, z), xx);
             plot(hAxes, datos.x, datos.y, 'ro', xx, yy, 'b-', datos.v3, yint, 'ks', 'MarkerFaceColor','k');
+            hold(hAxes,'on');
+            if esLog
+                yyf = log10(xx);
+                plot(hAxes, xx, yyf, 'g--', 'LineWidth',1.5);
+            end
+            hold(hAxes,'off');
             title(hAxes,'Interpolación de Lagrange');
             xlabel(hAxes,'x'); ylabel(hAxes,'y');
-            legend(hAxes,'Datos','Polinomio','Interpolado','Location','northeast');
+            if esLog
+                legend(hAxes,'Datos','Polinomio','Interpolado','log_{10}(x)','Location','northeast');
+            else
+                legend(hAxes,'Datos','Polinomio','Interpolado','Location','northeast');
+            end
             grid(hAxes,'on');
         end
         setResultadoMultilinea(['Resultado: ' resultado]);
